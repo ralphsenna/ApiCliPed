@@ -27,10 +27,10 @@ function App()
                 <ContextoUsuario.Provider value={[usuario, setUsuario]}>
                     <BrowserRouter>
                         <Routes>
-                            <Route path="/cliente" element={<TelaCadastroCliente />} />
-                            <Route path="/pedido" element={<TelaCadastroPedido />} />
-                            <Route path="/" element={<TelaMenu />} />
-                            <Route path="*" element={<Tela404 />} />
+                            <Route path="/cliente" element={<TelaCadastroCliente/>} />
+                            <Route path="/pedido" element={<TelaCadastroPedido/>} />
+                            <Route path="/" element={<TelaMenu/>} />
+                            <Route path="*" element={<Tela404/>} />
                         </Routes>
                     </BrowserRouter>
                 </ContextoUsuario.Provider>

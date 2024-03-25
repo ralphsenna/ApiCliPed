@@ -20,7 +20,7 @@ export default function Menu(props)
                         <NavDropdown title="Cadastros" id="basic-nav-dropdown">
                             <NavDropdown.Item><Link to="/cliente">Clientes</Link></NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item><Link to="/pedidos">Pedidos</Link></NavDropdown.Item>
+                            <NavDropdown.Item><Link to="/pedido">Pedidos</Link></NavDropdown.Item>
                         </NavDropdown>
                         <Nav.Link href="#" onClick={() => {
                                 setUsuario({ ...usuario, logado: false})

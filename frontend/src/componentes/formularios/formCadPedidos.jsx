@@ -118,70 +118,52 @@ export default function FormCadPedidos(props)
                     <Form.Control
                         required
                         type="text"
-                        placeholder="quantidade de itens"
-                        value={pedido.descricao}
+                        placeholder="qtdItens"
+                        value={pedido.qtdItens}
                         id="qtdItens"
                         name="qtdItens"
                         onChange={manipularMudanca}
                     />
-                    <Form.Control.Feedback type='invalid'>Por favor, informe a descrição do pedido.</Form.Control.Feedback>
+                    <Form.Control.Feedback type='invalid'>Por favor, informe a quantidade de itens do pedido.</Form.Control.Feedback>
                 </Form.Group>
-            </Row>
-            <Row className="mb-3">
                 <Form.Group as={Col} md="6">
-                    <Form.Label>Preço de Custo:</Form.Label>
+                    <Form.Label>Valor Total:</Form.Label>
                     <Form.Control
                         required
                         type="text"
-                        placeholder="precoCusto"
-                        id="precoCusto"
-                        name="precoCusto"
-                        value={pedido.precoCusto}
+                        placeholder="valTotal"
+                        id="valTotal"
+                        name="valTotal"
+                        value={pedido.valTotal}
                         onChange={manipularMudanca}
                     />
-                    <Form.Control.Feedback type='invalid'>Por favor, informe o preço de custo.</Form.Control.Feedback>
-                </Form.Group>
-                <Form.Group as={Col} md="6">
-                    <Form.Label>Preço de Venda:</Form.Label>
-                    <Form.Control
-                        required
-                        type="text"
-                        placeholder="precoVenda"
-                        id="precoVenda"
-                        name="precoVenda"
-                        value={pedido.precoVenda}
-                        onChange={manipularMudanca}
-                    />
-                    <Form.Control.Feedback type='invalid'>Por favor, informe o preço de venda.</Form.Control.Feedback>
+                    <Form.Control.Feedback type='invalid'>Por favor, informe o valor total.</Form.Control.Feedback>
                 </Form.Group>
             </Row>
             <Row className="mb-3">
                 <Form.Group as={Col} md="6" >
-                    <Form.Label>Válido até:</Form.Label>
+                    <Form.Label>Data do Pedido:</Form.Label>
                     <Form.Control 
                         type="date" 
-                        placeholder="" 
+                        placeholder="data" 
                         required 
-                        value={pedido.dataValidade}
-                        id="dataValidade"
-                        name="dataValidade"
+                        value={pedido.data}
+                        id="data"
+                        name="data"
                         onChange={manipularMudanca}/>
-                    <Form.Control.Feedback type="invalid">
-                        Por favor, informe a data de validade do pedido.
-                    </Form.Control.Feedback>
+                    <Form.Control.Feedback type="invalid">Por favor, informe a data do pedido.</Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group as={Col} md="3">
-                    <Form.Label>Qtd em Estoque:</Form.Label>
+                    <Form.Label>Observação:</Form.Label>
                     <Form.Control
-                        required
                         type="text"
-                        placeholder="0"
-                        id="qtdEstoque"
-                        name="qtdEstoque"
-                        value={pedido.qtdEstoque}
+                        placeholder="obs"
+                        id="obs"
+                        name="obs"
+                        value={pedido.obs}
                         onChange={manipularMudanca}
                     />
-                    <Form.Control.Feedback type='invalid'>Por favor, informe a quantidade em estoque desse pedido.</Form.Control.Feedback>
+                    <Form.Control.Feedback type='invalid'>Por favor, informe a observação.</Form.Control.Feedback>
                 </Form.Group>
             </Row>
             <Row className="mb-3">
@@ -190,21 +172,22 @@ export default function FormCadPedidos(props)
                     <Form.Select 
                         id='cliente' 
                         name='cliente'
-                        value={pedido.cliente.codigo}
+                        value={pedido.cliente.cod}
                         onChange={selecionarCliente}
                     >
-                    <option key={0} value={0}>Selecione uma cliente</option>
+                    <option key={0} value={0}>Selecione um cliente</option>
                     {
                         clientes.map((cliente) => {
                             return (
-                                <option key={cliente.codigo} value={cliente.codigo}>
-                                    {cliente.descricao}
+                                <option key={cliente.cod} value={cliente.cod}>
+                                    {cliente.nome}
+                                    {cliente.tel}
                                 </option>
                             );
                         })
                     }
                     </Form.Select>
-                    <Form.Control.Feedback type='invalid'>Por favor, informe a cliente do pedido.</Form.Control.Feedback>
+                    <Form.Control.Feedback type='invalid'>Por favor, informe o cliente do pedido.</Form.Control.Feedback>
                 </Form.Group>
             </Row>
             <Button type="submit">Gravar</Button>

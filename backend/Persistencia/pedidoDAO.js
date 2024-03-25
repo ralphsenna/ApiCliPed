@@ -15,7 +15,6 @@ export default class PedidoDAO
             const conexao = await conectar();
             const retorno = await conexao.execute(sql, parametros);
             pedido.cod = retorno[0].insertId;
-            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
@@ -29,7 +28,6 @@ export default class PedidoDAO
             pedido.obs, pedido.cliente.cod, pedido.cod];
             const conexao = await conectar();
             await conexao.execute(sql, parametros);
-            global.poolConexoes.releaseConnection(conexao);
         }
     }
 
@@ -41,7 +39,6 @@ export default class PedidoDAO
             const parametros = [pedido.cod];
             const conexao = await conectar();
             await conexao.execute(sql, parametros);
-            global.poolConexoes.releaseConnection(conexao);
         }
     }
 

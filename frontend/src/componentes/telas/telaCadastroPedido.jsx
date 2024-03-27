@@ -1,7 +1,10 @@
-import FormCadPedidos from "../formularios/formCadPedidos";
-import TabelaPedidos from "../tabelas/tabelaPedidos";
-import Pagina from "../templates/pagina";
 import { useEffect, useState } from "react";
+import { Button } from "react-bootstrap";
+import Pagina from "../templates/pagina";
+import TabelaPedidos from "../tabelas/tabelaPedidos";
+import FormCadPedidos from "../formularios/formCadPedidos";
+
+const url = "http://localhost:4000/pedido";
 
 export default function TelaCadastroPedido(props) 
 {
@@ -10,7 +13,7 @@ export default function TelaCadastroPedido(props)
 
     function buscarPedidos() 
     {
-        fetch('http://localhost:4000/pedido', {method: 'GET'})
+        fetch(url, {method: 'GET'})
         .then(resposta => resposta.json())
         .then(retorno => {
             if (retorno.status) 
@@ -26,11 +29,64 @@ export default function TelaCadastroPedido(props)
             alert("Erro: " + erro.message);
         });
     }
-
     useEffect(() => {
         buscarPedidos();
     }, [listaPedidos]);
 
+    function gravarPedido(pedido)
+    {
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify(pedido)
+        })
+        .then(resposta => resposta.json())
+        .then(retorno => {
+            if (retorno.status)
+            {
+                alert(retorno.mensagem + " Código do pedido: " + retorno.codigoGerado);
+                setListaPedidos([...listaPedidos, pedido]);
+                setExibirTabela(true);
+            }
+            else
+            {
+                alert(retorno.mensagem);
+            }
+        })
+        .catch(erro => {
+            alert("Erro: " + erro.message);
+        });
+    }
+
+    function excluirPedido(pedido)
+    {
+        fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({cod: pedido.cod})
+        })
+        .then(resposta => resposta.json())
+        .then(retorno => {
+            if (retorno.status)
+            {
+                alert(retorno.mensagem);
+                const novaListaPedidos = listaPedidos.filter(pedNovo => pedNovo.cod!==pedido.cod);
+                setListaPedidos(novaListaPedidos);
+            }
+            else
+            {
+                alert(retorno.mensagem);
+            }
+        })
+        .catch(erro => {
+            alert("Erro: " + erro.message);
+        });
+    }
+    
     if (exibirTabela) 
     {
         return (
@@ -39,7 +95,12 @@ export default function TelaCadastroPedido(props)
                     <h1>Tela de Cadastro de Pedidos</h1>
                     <br/>
                     <h2>Lista de Pedidos</h2>
-                    <TabelaPedidos listaPedidos={listaPedidos} setExibirTabela={setExibirTabela}/>
+                    <Button onClick={() => {
+                            setExibirTabela(false);
+                        }}>
+                        Cadastrar Novo Pedido
+                    </Button>
+                    <TabelaPedidos listaPedidos={listaPedidos} excluirPedido={excluirPedido} setExibirTabela={setExibirTabela}/>
                 </Pagina>
             </div>
         )
@@ -56,6 +117,7 @@ export default function TelaCadastroPedido(props)
                         setExibirTabela={setExibirTabela}
                         listaPedidos={listaPedidos}
                         setListaPedidos={setListaPedidos}
+                        gravarPedido={gravarPedido}
                     />
                 </Pagina>
             </div>

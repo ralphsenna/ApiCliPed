@@ -19,7 +19,7 @@ export default function Menu(props)
                     <Nav className="me-auto">
                         <NavDropdown title="Cadastros" id="basic-nav-dropdown">
                             <NavDropdown.Item><Link to="/cliente">Clientes</Link></NavDropdown.Item>
-                            <NavDropdown.Divider />
+                            <NavDropdown.Divider/>
                             <NavDropdown.Item><Link to="/pedido">Pedidos</Link></NavDropdown.Item>
                         </NavDropdown>
                         <Nav.Link href="#" onClick={() => {

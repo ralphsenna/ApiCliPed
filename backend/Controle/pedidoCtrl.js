@@ -64,7 +64,7 @@ export default class PedidoCtrl
                 pedido.atualizar().then(() => {
                     resposta.status(200).json({
                         "status": true,
-                        "mensagem": "Pedido atualizado com sucesso!"
+                        "mensagem": "Pedido " + pedido.cod + " atualizado com sucesso!"
                     });
                 })
                 .catch((erro) => {
@@ -104,7 +104,7 @@ export default class PedidoCtrl
                 pedido.excluir().then(() => {
                     resposta.status(200).json({
                         "status": true,
-                        "mensagem": "Pedido excluído com sucesso!"
+                        "mensagem": "Pedido " + pedido.cod + " excluído com sucesso!"
                     });
                 })
                 .catch((erro) => {

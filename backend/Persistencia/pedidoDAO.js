@@ -6,15 +6,29 @@ export default class PedidoDAO
 {
     async gravar(pedido) 
     {
-        if (pedido instanceof Pedido) 
+        if (pedido instanceof Pedido)
         {
-            const sql = `INSERT INTO pedido(ped_qtdItens, ped_valTotal, ped_data, 
-                ped_obs, cli_cod) VALUES(?,?,?,?,?)`;
-            const parametros = [pedido.qtdItens, pedido.valTotal, pedido.data,
-            pedido.obs, pedido.cliente.cod];
             const conexao = await conectar();
-            const retorno = await conexao.execute(sql, parametros);
-            pedido.cod = retorno[0].insertId;
+            await conexao.beginTransaction();
+            try
+            {
+                const sql = `INSERT INTO pedido(ped_qtdItens, ped_valTotal, ped_data, 
+                            ped_obs, cli_cod) VALUES(?,?,?,?,?)`;
+                const parametros = [pedido.qtdItens, pedido.valTotal, pedido.data,
+                                    pedido.obs, pedido.cliente.cod];
+                const retorno = await conexao.execute(sql, parametros);
+                pedido.cod = retorno[0].insertId;
+                await conexao.commit();
+            }
+            catch (erro)
+            {
+                await conexao.rollback();
+                throw erro;
+            }
+            finally
+            {
+                conexao.release();
+            }
         }
     }
 
@@ -22,12 +36,26 @@ export default class PedidoDAO
     {
         if (pedido instanceof Pedido) 
         {
-            const sql = `UPDATE pedido SET ped_qtdItens = ?, ped_valTotal = ?,
-                ped_data = ?, ped_obs = ?, cli_cod = ? WHERE ped_cod = ?`;
-            const parametros = [pedido.qtdItens, pedido.valTotal, pedido.data,
-            pedido.obs, pedido.cliente.cod, pedido.cod];
             const conexao = await conectar();
-            await conexao.execute(sql, parametros);
+            await conexao.beginTransaction();
+            try
+            {
+                const sql = `UPDATE pedido SET ped_qtdItens = ?, ped_valTotal = ?,
+                            ped_data = ?, ped_obs = ?, cli_cod = ? WHERE ped_cod = ?`;
+                const parametros = [pedido.qtdItens, pedido.valTotal, pedido.data,
+                                    pedido.obs, pedido.cliente.cod, pedido.cod];
+                const conexao = await conectar();
+                await conexao.execute(sql, parametros);
+            }
+            catch (erro)
+            {
+                await conexao.rollback();
+                throw erro;
+            }
+            finally
+            {
+                conexao.release();
+            }
         }
     }
 
@@ -35,10 +63,24 @@ export default class PedidoDAO
     {
         if (pedido instanceof Pedido) 
         {
-            const sql = 'DELETE FROM pedido WHERE ped_cod = ?';
-            const parametros = [pedido.cod];
             const conexao = await conectar();
-            await conexao.execute(sql, parametros);
+            await conexao.beginTransaction();
+            try
+            {
+                const sql = 'DELETE FROM pedido WHERE ped_cod = ?';
+                const parametros = [pedido.cod];
+                const conexao = await conectar();
+                await conexao.execute(sql, parametros);
+            }
+            catch (erro)
+            {
+                await conexao.rollback();
+                throw erro;
+            }
+            finally
+            {
+                conexao.release();
+            }
         }
     }
 
@@ -86,6 +128,7 @@ export default class PedidoDAO
                 listaPedidos.push(pedido);
             }
         }
+        conexao.release();
         return listaPedidos;
     }
 }

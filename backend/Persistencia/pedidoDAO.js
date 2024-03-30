@@ -44,8 +44,8 @@ export default class PedidoDAO
                             ped_data = ?, ped_obs = ?, cli_cod = ? WHERE ped_cod = ?`;
                 const parametros = [pedido.qtdItens, pedido.valTotal, pedido.data,
                                     pedido.obs, pedido.cliente.cod, pedido.cod];
-                const conexao = await conectar();
                 await conexao.execute(sql, parametros);
+                await conexao.commit();
             }
             catch (erro)
             {
@@ -69,8 +69,8 @@ export default class PedidoDAO
             {
                 const sql = 'DELETE FROM pedido WHERE ped_cod = ?';
                 const parametros = [pedido.cod];
-                const conexao = await conectar();
                 await conexao.execute(sql, parametros);
+                await conexao.commit();
             }
             catch (erro)
             {
@@ -98,9 +98,9 @@ export default class PedidoDAO
                 p.ped_data, p.ped_obs, p.cli_cod, c.cli_nome, c.cli_tel
                 FROM pedido p INNER JOIN cliente c ON p.cli_cod = c.cli_cod 
                 WHERE p.ped_cod = ?
-                ORDER BY p.ped_valTotal`;
+                ORDER BY p.ped_cod`;
             const parametros = [parametroConsulta];
-            const [registros, campos] = await conexao.execute(sql, parametros);
+            const [registros] = await conexao.execute(sql, parametros);
             for (const registro of registros)
             {
                 const cliente = new Cliente(registro.cli_cod, registro.cli_nome, registro.cli_tel);
@@ -116,9 +116,9 @@ export default class PedidoDAO
                 p.ped_data, p.ped_obs, p.cli_cod, c.cli_nome, c.cli_tel
                 FROM pedido p INNER JOIN cliente c ON p.cli_cod = c.cli_cod 
                 WHERE p.ped_valTotal like ?
-                ORDER BY p.ped_valTotal`;
+                ORDER BY p.ped_cod`;
             const parametros=['%'+parametroConsulta+'%'];
-            const [registros, campos] = await conexao.execute(sql, parametros);
+            const [registros] = await conexao.execute(sql, parametros);
             for (const registro of registros)
             {
                 const cliente = new Cliente(registro.cli_cod, registro.cli_nome, registro.cli_tel);

@@ -1,28 +1,22 @@
 import { Form, Row, Col, Button } from 'react-bootstrap';
-import { useState, useEffect } from 'react';
-
-const urlCliente = "http://localhost:4000/cliente";
+import { useState } from 'react';
 
 export default function FormCadPedidos(props)
 {
-    const [validado, setValidado] = useState(false);
-    const [listaClientes, setListaClientes] = useState([{
-        cod: 0,
-        nome: "Nenhuma cliente cadastrado"
-    }]);
-    const [pedido, setPedido] = useState({
-        cod: 0,
-        qtdItens: 0,
-        valTotal: 0,
-        data: "",
-        obs: "",
-        cliente:{}
-    });
+    const [validado, setValidado] = useState(true);
+    const [pedido, setPedido] = useState(props.pedido);
 
     function manipularMudanca(evento) 
     {
         const componente = evento.currentTarget;
-        setPedido({ ...pedido, [componente.name]: componente.value });
+        if (componente.name==='cliente')
+        {
+            setPedido({...pedido, cliente: {"cod": componente.value}});
+        }
+        else
+        {
+            setPedido({ ...pedido, [componente.name]: componente.value});
+        }
     }
 
     function manipularSubmissao(evento) 
@@ -30,55 +24,25 @@ export default function FormCadPedidos(props)
         evento.preventDefault();
         evento.stopPropagation();
         const form = evento.currentTarget;
-        if (form.checkValidity()===false) 
+        if (!form.checkValidity())
         {
-            setValidado(true);
+            setValidado(false);
         }
         else
         {
-            setValidado(false);
+            setValidado(true);
             props.gravarPedido(pedido);
         }
     }
 
-    function buscarCliente()
-    {
-        fetch(urlCliente, {method: 'GET'})
-        .then(resposta => resposta.json())
-        .then(retorno => {
-            if (retorno.status)
-            {
-                setListaClientes(retorno.listaClientes);
-            }
-        })
-        .catch(erro => {
-            setListaClientes([{
-                cod: 0,
-                nome: "Erro ao recuperar clientes: " + erro.message
-            }]);
-        });
-    }
-    useEffect(() => {
-        buscarCliente();
-    }, [listaClientes]);
-
-    function selecionarCliente(evento)
-    {
-        const codigoCliente = evento.currentTarget.value;
-        setPedido({...pedido, cliente: {
-                "cod": codigoCliente
-            }
-        });
-    }
-
     return (
-        <Form noValidate validated={validado} onSubmit={manipularSubmissao}>
+        <Form noValidate validated={!validado} onSubmit={manipularSubmissao}>
             <Row className="mb-3">
-                <Form.Group as={Col} md="4">
+                <Form.Group as={Col} md="1">
                     <Form.Label>Código</Form.Label>
                     <Form.Control
                         required
-                        type="text"
+                        type="number"
                         placeholder="0"
                         value={pedido.cod}
                         id="cod"
@@ -90,11 +54,11 @@ export default function FormCadPedidos(props)
                 </Form.Group>
             </Row>
             <Row className="mb-3">
-                <Form.Group as={Col} md="12">
+                <Form.Group as={Col} md="2">
                     <Form.Label>Qtd. de Itens:</Form.Label>
                     <Form.Control
                         required
-                        type="text"
+                        type="number"
                         placeholder="qtdItens"
                         value={pedido.qtdItens}
                         id="qtdItens"
@@ -103,7 +67,7 @@ export default function FormCadPedidos(props)
                     />
                     <Form.Control.Feedback type='invalid'>Por favor, informe a quantidade de itens do pedido.</Form.Control.Feedback>
                 </Form.Group>
-                <Form.Group as={Col} md="6">
+                <Form.Group as={Col} md="3">
                     <Form.Label>Valor Total:</Form.Label>
                     <Form.Control
                         required
@@ -116,21 +80,23 @@ export default function FormCadPedidos(props)
                     />
                     <Form.Control.Feedback type='invalid'>Por favor, informe o valor total.</Form.Control.Feedback>
                 </Form.Group>
-            </Row>
-            <Row className="mb-3">
-                <Form.Group as={Col} md="6" >
+                <Form.Group as={Col} md="2" >
                     <Form.Label>Data do Pedido:</Form.Label>
                     <Form.Control 
                         required 
                         type="date" 
                         placeholder="data" 
-                        value={pedido.data}
                         id="data"
                         name="data"
-                        onChange={manipularMudanca}/>
+                        value={pedido.data}
+                        onChange={manipularMudanca}
+                        max={new Date(Date.now()).toISOString().split("T")[0]}
+                    />
                     <Form.Control.Feedback type="invalid">Por favor, informe a data do pedido.</Form.Control.Feedback>
                 </Form.Group>
-                <Form.Group as={Col} md="3">
+            </Row>
+            <Row className="mb-3">
+                <Form.Group as={Col} md="7">
                     <Form.Label>Observação:</Form.Label>
                     <Form.Control
                         required
@@ -145,32 +111,47 @@ export default function FormCadPedidos(props)
                 </Form.Group>
             </Row>
             <Row className="mb-3">
-                <Form.Group as={Col} md="10">
+                <Form.Group as={Col} md="3">
                     <Form.Label>Cliente:</Form.Label>
                     <Form.Select 
                         required
                         id='cliente' 
                         name='cliente'
                         value={pedido.cliente.cod}
-                        onChange={selecionarCliente}
+                        onChange={manipularMudanca}
                     >
-                    <option key={0} value={0}>Selecione um cliente</option>
-                    {
-                        listaClientes.map((cliente) => {
-                            return (
-                                <option key={cliente.cod} value={cliente.cod}>
-                                    {cliente.nome}
-                                </option>
-                            );
-                        })
-                    }
+                        {
+                            props.listaClientes[0].cod!=="" ?
+                            (
+                                <><option key={0} value={""}>Selecione um cliente</option>
+                                {
+                                    props.listaClientes.map((cliente) => {
+                                        return (
+                                            <option key={cliente.cod} value={cliente.cod}>{cliente.nome}</option>
+                                        );
+                                    }) 
+                                }</>
+                            ): <option key={0} value={""}>{props.listaClientes[0].nome}</option>
+                        }
                     </Form.Select>
-                    <Form.Control.Feedback type='invalid'>Por favor, informe o cliente do pedido.</Form.Control.Feedback>
+                    <Form.Control.Feedback type='invalid'>Por favor, selecione um cliente.</Form.Control.Feedback>
                 </Form.Group>
             </Row>
-            <Button type="submit">Gravar</Button>
+            <Button style={{marginRight:'5px'}} type="submit">
+                {props.atualizando ? 'Atualizar' : 'Gravar'}
+            </Button>
             <Button onClick={() => {
+                if (props.atualizando)
+                    props.setAtualizando(false);
                 props.setExibirTabela(true);
+                props.setPedidoAtual({
+                    cod: 0,
+                    qtdItens: null,
+                    valTotal: null,
+                    data: "",
+                    obs: "",
+                    cliente: {}
+                })
             }}>Voltar</Button>
         </Form>
     );

@@ -7,11 +7,25 @@ export default class ClienteDAO
     {
         if (cliente instanceof Cliente)
         {
-            const sql = 'INSERT INTO cliente(cli_nome, cli_tel) VALUES(?,?)'; 
-            const parametros = [cliente.nome, cliente.tel];
             const conexao = await conectar();
-            const retorno = await conexao.execute(sql, parametros);
-            cliente.cod = retorno[0].insertId;
+            await conexao.beginTransaction();
+            try
+            {
+                const sql = 'INSERT INTO cliente(cli_nome, cli_tel) VALUES(?,?)'; 
+                const parametros = [cliente.nome, cliente.tel];
+                const retorno = await conexao.execute(sql, parametros);
+                cliente.cod = retorno[0].insertId;
+                await conexao.commit();
+            }
+            catch (erro)
+            {
+                await conexao.rollback();
+                throw erro;
+            }
+            finally
+            {
+                conexao.release();
+            }
         }
     }
 
@@ -19,10 +33,24 @@ export default class ClienteDAO
     {
         if (cliente instanceof Cliente)
         {
-            const sql = 'UPDATE cliente SET cli_nome = ?, cli_tel = ? WHERE cli_cod = ?'; 
-            const parametros = [cliente.nome, cliente.tel, cliente.cod];
             const conexao = await conectar();
-            await conexao.execute(sql, parametros);
+            await conexao.beginTransaction();
+            try
+            {
+                const sql = 'UPDATE cliente SET cli_nome = ?, cli_tel = ? WHERE cli_cod = ?'; 
+                const parametros = [cliente.nome, cliente.tel, cliente.cod];
+                await conexao.execute(sql, parametros);
+                await conexao.commit();
+            }
+            catch (erro)
+            {
+                await conexao.rollback();
+                throw erro;
+            }
+            finally
+            {
+                conexao.release();
+            }
         }
     }
 
@@ -30,10 +58,24 @@ export default class ClienteDAO
     {
         if (cliente instanceof Cliente)
         {
-            const sql = 'DELETE FROM cliente WHERE cli_cod = ?'; 
-            const parametros = [cliente.cod];
             const conexao = await conectar();
-            await conexao.execute(sql, parametros); 
+            await conexao.beginTransaction();
+            try
+            {
+                const sql = 'DELETE FROM cliente WHERE cli_cod = ?'; 
+                const parametros = [cliente.cod];
+                await conexao.execute(sql, parametros); 
+                await conexao.commit();
+            }
+            catch (erro)
+            {
+                await conexao.rollback();
+                throw erro;
+            }
+            finally
+            {
+                conexao.release();
+            }
         }
     }
 
@@ -41,7 +83,6 @@ export default class ClienteDAO
     {
         let sql = '';
         let parametros=[];
-       
         if (!isNaN(parseInt(parametroConsulta)))
         {
             sql = 'SELECT * FROM cliente WHERE cli_cod = ? order by cli_nome';
@@ -64,6 +105,7 @@ export default class ClienteDAO
             const cliente = new Cliente(registro.cli_cod, registro.cli_nome, registro.cli_tel);
             listaClientes.push(cliente);
         }
+        conexao.release();
         return listaClientes;
     }
 }

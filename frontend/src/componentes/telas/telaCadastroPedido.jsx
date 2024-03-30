@@ -4,21 +4,65 @@ import Pagina from "../templates/pagina";
 import TabelaPedidos from "../tabelas/tabelaPedidos";
 import FormCadPedidos from "../formularios/formCadPedidos";
 
-const url = "http://localhost:4000/pedido";
+const urlCliente = "http://localhost:4000/cliente";
+const urlPedido = "http://localhost:4000/pedido";
 
 export default function TelaCadastroPedido(props) 
 {
     const [exibirTabela, setExibirTabela] = useState(true);
     const [listaPedidos, setListaPedidos] = useState([]);
+    const [listaClientes, setListaClientes] = useState([{
+        cod: "",
+        nome: "Nenhuma cliente cadastrado"
+    }]);
+    const [atualizando, setAtualizando] = useState(false);
+    const [pedidoAtual, setPedidoAtual] = useState({
+        cod: 0, 
+        qtdItens: null,
+        valTotal: null,
+        data: "",
+        obs: "",
+        cliente: {}
+    });
 
-    function buscarPedidos() 
+    function consultarCliente()
     {
-        fetch(url, {method: 'GET'})
+        fetch(urlCliente, {method: 'GET'})
+        .then(resposta => resposta.json())
+        .then(retorno => {
+            if (retorno.status)
+            {
+                setListaClientes(retorno.listaClientes);
+            }
+            else
+            {
+                alert(retorno.mensagem);
+            }
+        })
+        .catch(erro => {
+            setListaClientes([{
+                cod: 0,
+                nome: "Erro ao recuperar clientes: " + erro.message
+            }]);
+        });
+    }
+    useEffect(() => {
+        if (!exibirTabela)
+            consultarCliente();
+    }, [exibirTabela]);
+
+    function consultarPedidos() 
+    {
+        fetch(urlPedido, {method: 'GET'})
         .then(resposta => resposta.json())
         .then(retorno => {
             if (retorno.status) 
             {
                 setListaPedidos(retorno.listaPedidos);
+                for (let i=0; i<retorno.listaPedidos.length; i++)
+                {
+                    retorno.listaPedidos[i].data = retorno.listaPedidos[i].data.split("T")[0];
+                }
             }
             else 
             {
@@ -30,39 +74,74 @@ export default function TelaCadastroPedido(props)
         });
     }
     useEffect(() => {
-        buscarPedidos();
-    }, [listaPedidos]);
+        if (exibirTabela)
+            consultarPedidos();
+    }, [exibirTabela]);
 
     function gravarPedido(pedido)
     {
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json'
-            },
-            body: JSON.stringify(pedido)
-        })
-        .then(resposta => resposta.json())
-        .then(retorno => {
-            if (retorno.status)
-            {
-                alert(retorno.mensagem + " Código do pedido: " + retorno.codigoGerado);
-                setListaPedidos([...listaPedidos, pedido]);
-                setExibirTabela(true);
-            }
-            else
-            {
-                alert(retorno.mensagem);
-            }
-        })
-        .catch(erro => {
-            alert("Erro: " + erro.message);
-        });
+        if (!atualizando)
+        {
+            fetch(urlPedido, {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(pedido)
+            })
+            .then(resposta => resposta.json())
+            .then(retorno => {
+                if (retorno.status)
+                {
+                    alert(retorno.mensagem + " Código do pedido: " + retorno.codigoGerado);
+                    setExibirTabela(true);
+                }
+                else
+                {
+                    alert(retorno.mensagem);
+                }
+            })
+            .catch(erro => {
+                alert("Erro: " + erro.message);
+            });
+        }
+        else
+        {
+            fetch(urlPedido, {
+                method: 'PUT',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(pedido)
+            })
+            .then(resposta => resposta.json())
+            .then(retorno => {
+                if (retorno.status)
+                {
+                    alert(retorno.mensagem);
+                    setExibirTabela(true);
+                }
+                else
+                {
+                    alert(retorno.mensagem);
+                }
+            })
+            .catch(erro => {
+                alert("Erro: " + erro.message);
+            });
+        }
+    }
+
+    function atualizarPedido(pedido)
+    {
+        setExibirTabela(false);
+        setAtualizando(true);
+        setPedidoAtual(pedido);
     }
 
     function excluirPedido(pedido)
     {
-        fetch(url, {
+        fetch(urlPedido, {
             method: 'DELETE',
             headers: {
                 'Content-type': 'application/json'
@@ -74,8 +153,8 @@ export default function TelaCadastroPedido(props)
             if (retorno.status)
             {
                 alert(retorno.mensagem);
-                const novaListaPedidos = listaPedidos.filter(pedNovo => pedNovo.cod!==pedido.cod);
-                setListaPedidos(novaListaPedidos);
+                
+                consultarPedidos();
             }
             else
             {
@@ -86,7 +165,7 @@ export default function TelaCadastroPedido(props)
             alert("Erro: " + erro.message);
         });
     }
-    
+
     if (exibirTabela) 
     {
         return (
@@ -100,7 +179,7 @@ export default function TelaCadastroPedido(props)
                         }}>
                         Cadastrar Novo Pedido
                     </Button>
-                    <TabelaPedidos listaPedidos={listaPedidos} excluirPedido={excluirPedido} setExibirTabela={setExibirTabela}/>
+                    <TabelaPedidos listaPedidos={listaPedidos} atualizarPedido={atualizarPedido} excluirPedido={excluirPedido} setExibirTabela={setExibirTabela}/>
                 </Pagina>
             </div>
         )
@@ -114,10 +193,14 @@ export default function TelaCadastroPedido(props)
                     <br/>
                     <h2>Formulário de cadastro de Pedidos</h2>
                     <FormCadPedidos 
+                        exibirTabela={exibirTabela}
                         setExibirTabela={setExibirTabela}
-                        listaPedidos={listaPedidos}
-                        setListaPedidos={setListaPedidos}
+                        listaClientes={listaClientes}
                         gravarPedido={gravarPedido}
+                        atualizando={atualizando}
+                        setAtualizando={setAtualizando}
+                        pedido={pedidoAtual}
+                        setPedidoAtual={setPedidoAtual}
                     />
                 </Pagina>
             </div>

@@ -16,18 +16,19 @@ export default function TelaCadastroPedido(props)
         nome: "Nenhuma cliente cadastrado"
     }]);
     const [atualizando, setAtualizando] = useState(false);
-    const [pedidoAtual, setPedidoAtual] = useState({
-        cod: 0, 
+    const pedidoVazio = {
+        cod: 0,
         qtdItens: null,
         valTotal: null,
         data: "",
         obs: "",
         cliente: {}
-    });
+    };
+    const [pedidoAtual, setPedidoAtual] = useState(pedidoVazio);
 
-    function consultarCliente()
+    async function consultarCliente()
     {
-        fetch(urlCliente, {method: 'GET'})
+        await fetch(urlCliente, {method: 'GET'})
         .then(resposta => resposta.json())
         .then(retorno => {
             if (retorno.status)
@@ -41,19 +42,15 @@ export default function TelaCadastroPedido(props)
         })
         .catch(erro => {
             setListaClientes([{
-                cod: 0,
+                cod: "",
                 nome: "Erro ao recuperar clientes: " + erro.message
             }]);
         });
     }
-    useEffect(() => {
-        if (!exibirTabela)
-            consultarCliente();
-    }, [exibirTabela]);
 
-    function consultarPedidos() 
+    async function consultarPedido() 
     {
-        fetch(urlPedido, {method: 'GET'})
+        await fetch(urlPedido, {method: 'GET'})
         .then(resposta => resposta.json())
         .then(retorno => {
             if (retorno.status) 
@@ -75,14 +72,16 @@ export default function TelaCadastroPedido(props)
     }
     useEffect(() => {
         if (exibirTabela)
-            consultarPedidos();
+            consultarPedido();
+        else
+            consultarCliente();
     }, [exibirTabela]);
 
-    function gravarPedido(pedido)
+    async function gravarPedido(pedido)
     {
         if (!atualizando)
         {
-            fetch(urlPedido, {
+            await fetch(urlPedido, {
                 method: 'POST',
                 headers: {
                     'Content-type': 'application/json'
@@ -93,8 +92,7 @@ export default function TelaCadastroPedido(props)
             .then(retorno => {
                 if (retorno.status)
                 {
-                    alert(retorno.mensagem + " Código do pedido: " + retorno.codigoGerado);
-                    setExibirTabela(true);
+                    alert(retorno.mensagem + " Código do pedido: " + retorno.codigoGerado);                   
                 }
                 else
                 {
@@ -107,7 +105,7 @@ export default function TelaCadastroPedido(props)
         }
         else
         {
-            fetch(urlPedido, {
+             await fetch(urlPedido, {
                 method: 'PUT',
                 headers: {
                     'Content-type': 'application/json'
@@ -119,7 +117,6 @@ export default function TelaCadastroPedido(props)
                 if (retorno.status)
                 {
                     alert(retorno.mensagem);
-                    setExibirTabela(true);
                 }
                 else
                 {
@@ -129,19 +126,22 @@ export default function TelaCadastroPedido(props)
             .catch(erro => {
                 alert("Erro: " + erro.message);
             });
+            setAtualizando(false);
         }
+        setExibirTabela(true);
+        setPedidoAtual(pedidoVazio);
     }
 
-    function atualizarPedido(pedido)
+    async function atualizarPedido(pedido)
     {
         setExibirTabela(false);
         setAtualizando(true);
         setPedidoAtual(pedido);
     }
 
-    function excluirPedido(pedido)
+    async function excluirPedido(pedido)
     {
-        fetch(urlPedido, {
+        await fetch(urlPedido, {
             method: 'DELETE',
             headers: {
                 'Content-type': 'application/json'
@@ -153,8 +153,6 @@ export default function TelaCadastroPedido(props)
             if (retorno.status)
             {
                 alert(retorno.mensagem);
-                
-                consultarPedidos();
             }
             else
             {
@@ -164,6 +162,7 @@ export default function TelaCadastroPedido(props)
         .catch(erro => {
             alert("Erro: " + erro.message);
         });
+        consultarPedido();
     }
 
     if (exibirTabela) 
@@ -201,6 +200,7 @@ export default function TelaCadastroPedido(props)
                         setAtualizando={setAtualizando}
                         pedido={pedidoAtual}
                         setPedidoAtual={setPedidoAtual}
+                        pedidoVazio={pedidoVazio}
                     />
                 </Pagina>
             </div>

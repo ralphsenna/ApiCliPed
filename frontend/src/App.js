@@ -10,8 +10,8 @@ import TelaCadastroPedido from "./componentes/telas/telaCadastroPedido";
 function App() 
 {
     const [usuario, setUsuario] = useState({
-        nome: "",
-        logado: false
+        nome: "admin",
+        logado: true
     });
 
     if (!usuario.logado) 

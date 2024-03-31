@@ -41,14 +41,13 @@ export default function FormCadPedidos(props)
                 <Form.Group as={Col} md="1">
                     <Form.Label>Código</Form.Label>
                     <Form.Control
-                        required
+                        disabled
                         type="number"
                         placeholder="0"
                         value={pedido.cod}
                         id="cod"
                         name="cod"
                         onChange={manipularMudanca}
-                        disabled
                     />
                     <Form.Control.Feedback type='invalid'>Por favor, informe o código do pedido.</Form.Control.Feedback> {/* verificar sobre */}
                 </Form.Group>
@@ -59,7 +58,7 @@ export default function FormCadPedidos(props)
                     <Form.Control
                         required
                         type="number"
-                        placeholder="qtdItens"
+                        placeholder="Qtd. de Itens"
                         value={pedido.qtdItens}
                         id="qtdItens"
                         name="qtdItens"
@@ -72,7 +71,7 @@ export default function FormCadPedidos(props)
                     <Form.Control
                         required
                         type="text"
-                        placeholder="valTotal"
+                        placeholder="Valor Total"
                         id="valTotal"
                         name="valTotal"
                         value={pedido.valTotal}
@@ -85,7 +84,7 @@ export default function FormCadPedidos(props)
                     <Form.Control 
                         required 
                         type="date" 
-                        placeholder="data" 
+                        placeholder="Data do Pedido" 
                         id="data"
                         name="data"
                         value={pedido.data}
@@ -101,7 +100,7 @@ export default function FormCadPedidos(props)
                     <Form.Control
                         required
                         type="text"
-                        placeholder="obs"
+                        placeholder="Observação"
                         id="obs"
                         name="obs"
                         value={pedido.obs}
@@ -144,14 +143,7 @@ export default function FormCadPedidos(props)
                 if (props.atualizando)
                     props.setAtualizando(false);
                 props.setExibirTabela(true);
-                props.setPedidoAtual({
-                    cod: 0,
-                    qtdItens: null,
-                    valTotal: null,
-                    data: "",
-                    obs: "",
-                    cliente: {}
-                })
+                props.setPedidoAtual(props.pedidoVazio);
             }}>Voltar</Button>
         </Form>
     );
